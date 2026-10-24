@@ -21,9 +21,13 @@ const QUESTIONS = [
   { category: "Favourite things", kicker: "LAST ONE, PROMISE ♡", question: "What's one thing you wish more people knew about you?", subtitle: "Anything at all — your answer can be as short or detailed as you like.", options: ["My interests / things I love", "What makes me feel appreciated", "My goals and things I'm working on", "I'm still figuring that out"], symbols: ["♫","♡","☆","☁"], customPlaceholder: "Your own answer… (optional)" }
 ];
 
+import { db } from "./firebase-config.js";
+import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+
 const welcomeScreen = document.querySelector("#welcomeScreen");
 const quizScreen = document.querySelector("#quizScreen");
 const doneScreen = document.querySelector("#doneScreen");
+const consentCheckbox = document.querySelector("#consentCheckbox");
 const startButton = document.querySelector("#startButton");
 const categoryLabel = document.querySelector("#categoryLabel");
 const currentNumber = document.querySelector("#currentNumber");
@@ -36,17 +40,19 @@ const optionsList = document.querySelector("#optionsList");
 const customAnswer = document.querySelector("#customAnswer");
 const backButton = document.querySelector("#backButton");
 const nextButton = document.querySelector("#nextButton");
-const answerSummary = document.querySelector("#answerSummary");
-const downloadButton = document.querySelector("#downloadButton");
-const shareButton = document.querySelector("#shareButton");
 const restartButton = document.querySelector("#restartButton");
+const doneIntro = document.querySelector("#doneIntro");
+const doneMessage = document.querySelector("#doneMessage");
 const toast = document.querySelector("#toast");
 
 let index = 0;
 let answers = QUESTIONS.map(() => ({ choice: "", custom: "" }));
 let toastTimeout;
+let isSubmitting = false;
 
 totalNumber.textContent = String(QUESTIONS.length).padStart(2, "0");
+startButton.disabled = true;
+consentCheckbox.addEventListener("change", () => { startButton.disabled = !consentCheckbox.checked; });
 
 function showScreen(screen) {
   [welcomeScreen, quizScreen, doneScreen].forEach(item => {
@@ -55,22 +61,22 @@ function showScreen(screen) {
   });
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
-
 function showToast(message) {
   toast.textContent = message;
   toast.classList.add("show");
   clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => toast.classList.remove("show"), 2600);
+  toastTimeout = setTimeout(() => toast.classList.remove("show"), 2800);
 }
-
 function currentAnswerText(questionIndex) {
   const answer = answers[questionIndex];
   const question = QUESTIONS[questionIndex];
   const chosen = answer.choice ? question.options[Number(answer.choice)] : "";
+  // If she typed a custom answer, preserve both the selected option and her extra detail.
+  if (answer.custom.trim() && chosen) return `${chosen} — ${answer.custom.trim()}`;
   if (answer.custom.trim()) return answer.custom.trim();
-  return chosen || "";
+  return chosen || "Skipped";
 }
-
+function hasAnswer() { return Boolean(answers[index].choice || answers[index].custom.trim()); }
 function renderQuestion() {
   const q = QUESTIONS[index];
   const answer = answers[index];
@@ -83,7 +89,6 @@ function renderQuestion() {
   customAnswer.value = answer.custom;
   customAnswer.placeholder = q.customPlaceholder || "Type whatever comes to mind…";
   optionsList.replaceChildren();
-
   q.options.forEach((option, optionIndex) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -103,31 +108,28 @@ function renderQuestion() {
         el.classList.toggle("selected", selected);
         el.setAttribute("aria-pressed", String(selected));
       });
-      nextButton.disabled = !hasAnswer();
+      nextButton.disabled = !hasAnswer() || isSubmitting;
     });
     optionsList.append(button);
   });
-
   backButton.style.visibility = index === 0 ? "hidden" : "visible";
-  nextButton.innerHTML = index === QUESTIONS.length - 1
-    ? 'Finish <span>♡</span>'
-    : 'Continue <span>→</span>';
-  nextButton.disabled = !hasAnswer();
+  nextButton.innerHTML = index === QUESTIONS.length - 1 ? 'Finish <span>♡</span>' : 'Continue <span>→</span>';
+  nextButton.disabled = !hasAnswer() || isSubmitting;
 }
-
-function hasAnswer() {
-  return Boolean(answers[index].choice || answers[index].custom.trim());
-}
-
 function startQuiz() {
+  if (!consentCheckbox.checked) return;
   index = 0;
+  answers = QUESTIONS.map(() => ({ choice: "", custom: "" }));
   showScreen(quizScreen);
   renderQuestion();
 }
-
-function moveNext() {
+function moveBack() {
   answers[index].custom = customAnswer.value.slice(0, 180);
-  if (!hasAnswer()) return;
+  if (index > 0) { index--; renderQuestion(); }
+}
+async function moveNext() {
+  answers[index].custom = customAnswer.value.slice(0, 180);
+  if (!hasAnswer() || isSubmitting) return;
   if (index < QUESTIONS.length - 1) {
     index++;
     renderQuestion();
@@ -135,97 +137,54 @@ function moveNext() {
       [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "translateY(0)" }],
       { duration: 240, easing: "ease-out" }
     );
-  } else {
-    finishQuiz();
-  }
-}
-
-function moveBack() {
-  answers[index].custom = customAnswer.value.slice(0, 180);
-  if (index > 0) {
-    index--;
-    renderQuestion();
-  }
-}
-
-function finishQuiz() {
-  answers[index].custom = customAnswer.value.slice(0, 180);
-  answerSummary.replaceChildren();
-  QUESTIONS.forEach((q, i) => {
-    const value = currentAnswerText(i);
-    if (!value) return;
-    const item = document.createElement("div");
-    item.className = "summary-item";
-    const category = document.createElement("small");
-    category.textContent = q.category;
-    const answer = document.createElement("b");
-    answer.textContent = value;
-    item.append(category, answer);
-    answerSummary.append(item);
-  });
-  showScreen(doneScreen);
-}
-
-function exportText() {
-  const lines = [
-    "PROJECT CUPID — A LITTLE ABOUT YOU",
-    "A personal interest snapshot",
-    "",
-    ...QUESTIONS.map((q, i) => {
-      const answer = currentAnswerText(i) || "Skipped";
-      return `${q.category} — ${q.question}\n${answer}`;
-    }),
-    "",
-    "Shared by choice. Made with care."
-  ];
-  return lines.join("\n\n");
-}
-
-function downloadAnswers() {
-  const blob = new Blob([exportText()], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "my-cupid-answers.txt";
-  document.body.append(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-  showToast("Your answers file is ready ♡");
-}
-
-async function shareAnswers() {
-  const text = exportText();
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: "My Project Cupid answers", text });
-    } catch (error) {
-      if (error?.name !== "AbortError") showToast("Sharing wasn't available. You can save your answers instead.");
-    }
     return;
   }
+  await submitAnswers();
+}
+async function submitAnswers() {
+  isSubmitting = true;
+  nextButton.disabled = true;
+  nextButton.textContent = "Sending…";
+  doneIntro.textContent = "Sending your answers securely…";
+  doneMessage.textContent = "Please keep this page open for a moment.";
   try {
-    await navigator.clipboard.writeText(text);
-    showToast("Answers copied — share them wherever you like ♡");
-  } catch {
-    downloadAnswers();
+    const payload = QUESTIONS.map((q, i) => ({
+      category: q.category,
+      question: q.question,
+      answer: currentAnswerText(i)
+    }));
+    await addDoc(collection(db, "cupidSubmissions"), {
+      quizVersion: 1,
+      answers: payload,
+      consentGiven: true,
+      createdAt: serverTimestamp()
+    });
+    showScreen(doneScreen);
+    doneIntro.textContent = "Your answers have been sent. Thanks for sharing a little tour of your world — you can close this page now.";
+    doneMessage.textContent = "Your answers are stored in the quiz creator's Firebase project and are readable only by the creator's authenticated account.";
+  } catch (error) {
+    console.error("PROJECT CUPID submission failed:", error);
+    isSubmitting = false;
+    nextButton.innerHTML = 'Try sending again <span>↻</span>';
+    nextButton.disabled = false;
+    doneIntro.textContent = "We couldn't send your answers just yet. Please check your connection and try again.";
+    doneMessage.textContent = "Nothing was confirmed as saved. You can retry without re-answering the questions.";
+    showToast("Couldn't send answers. Check Firebase setup and try again.");
   }
 }
-
 function restartQuiz() {
+  if (isSubmitting) return;
   answers = QUESTIONS.map(() => ({ choice: "", custom: "" }));
-  startQuiz();
+  index = 0;
+  showScreen(welcomeScreen);
 }
-
 startButton.addEventListener("click", startQuiz);
 nextButton.addEventListener("click", moveNext);
 backButton.addEventListener("click", moveBack);
 customAnswer.addEventListener("input", () => {
   answers[index].custom = customAnswer.value.slice(0, 180);
-  nextButton.disabled = !hasAnswer();
+  nextButton.disabled = !hasAnswer() || isSubmitting;
 });
-downloadButton.addEventListener("click", downloadAnswers);
-shareButton.addEventListener("click", shareAnswers);
 restartButton.addEventListener("click", restartQuiz);
 document.addEventListener("keydown", event => {
   if (!quizScreen.hidden && event.key === "Enter" && document.activeElement !== customAnswer) {
