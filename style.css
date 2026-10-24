@@ -93,6 +93,14 @@ h2 { position:relative; max-width:565px; margin:0; font-size:clamp(27px,4.7vw,38
 .custom-answer { width:100%; height:46px; padding:0 14px; border:1px solid #e0e9f6; border-radius:12px; outline:none; background:#fbfcff; color:var(--ink); font-size:12px; transition:border .2s, box-shadow .2s; }
 .custom-answer:focus { border-color:#8db3e7; box-shadow:0 0 0 3px rgba(141,179,231,.17); }
 .custom-answer::placeholder { color:#b1bdcc; }
+.skip-note { margin:8px 0 0; color:#9aa9bd; font-size:11px; line-height:1.5; }
+.result-actions { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:14px; margin-top:18px; }
+.result-actions .primary-button { min-width:180px; }
+.result-actions .restart-button { margin-top:0; }
+@media(max-width:480px) {
+  .result-actions { flex-direction:column; align-items:stretch; }
+  .result-actions .primary-button { width:100%; }
+}
 .quiz-controls { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:19px; border-top:1px solid #edf1f8; }
 .text-button { padding:10px 2px; border:0; background:transparent; color:#8295ae; cursor:pointer; font-size:12px; }
 .text-button:hover { color:#456fAA; }
