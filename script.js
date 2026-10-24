@@ -174,7 +174,7 @@ const QUESTIONS = [
   }
 ];
 
-import { db } from "./firebase-config.js?v=2";
+import { db } from "./firebase-config.js?v=3";
 import {
   addDoc,
   collection,
@@ -412,9 +412,10 @@ async function submitAnswers() {
     nextButton.innerHTML = 'Try sending again <span>↻</span>';
     nextButton.disabled = false;
 
-    showToast(
-      "Couldn't send your answers. Check your connection and Firebase setup, then try again."
-    );
+    const code = error?.code || "unknown";
+    const details = error?.message || "No additional error details were provided.";
+    showToast(`Couldn't send answers (${code}). ${details}`);
+
   }
 }
 
