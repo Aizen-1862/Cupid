@@ -6,14 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#eaf4ff">
   <meta name="description" content="A gentle, romantic interest-discovery quiz about music, movies, hobbies, style, and favourite things.">
-  <title>PROJECT CUPID — A Little About You</title>
+  <title>A Little About You — Your Little Universe</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css">
-  <script type="module" src="script.js"></script>
+  <link rel="stylesheet" href="style.css?v=2">
+  <script type="module" src="script.js?v=2"></script>
 </head>
 
 <body>
@@ -23,11 +23,11 @@
   <div class="floating-heart heart-b" aria-hidden="true">✧</div>
 
   <header class="topbar">
-    <a class="brand" href="#" aria-label="Project Cupid home">
+    <a class="brand" href="#" aria-label="A Little About You home">
       <span class="brand-icon">♡</span>
       <span class="brand-word">
-        project <b>cupid</b>
-        <small>A LITTLE ABOUT YOU</small>
+        a little <b>about you</b>
+        <small>YOUR LITTLE UNIVERSE</small>
       </span>
     </a>
     <div class="top-note"><span class="tiny-heart">♥</span> made for the little things</div>
@@ -63,9 +63,9 @@
       <label class="consent-box" for="consentCheckbox">
         <input id="consentCheckbox" type="checkbox">
         <span>
-          Your answers will be saved and shared with the quiz creator to help
-          make something personalized for you. You can review your answers at
-          the end and skip anything you don't want to answer.
+          Your answers will be saved and shared with the person who made this
+          page. You can review your responses at the end, skip any question,
+          and choose whether to share your recap.
         </span>
       </label>
 
@@ -121,11 +121,12 @@
           maxlength="180"
           placeholder="Type whatever comes to mind…"
         >
+        <p class="skip-note">You can leave this one blank and continue.</p>
       </div>
 
       <div class="quiz-controls">
         <button id="backButton" class="text-button">← Back</button>
-        <span class="autosave-note">♡ saved as you go</span>
+        <span class="autosave-note">♡ kept on this page as you go</span>
         <button id="nextButton" class="primary-button" disabled>
           Continue <span>→</span>
         </button>
@@ -148,22 +149,26 @@
         <span>Here's a recap of your answers.</span>
       </div>
 
-      <div id="answerSummary" class="answer-summary" aria-label="Your quiz answers"></div>
+      <div id="answerSummary" class="answer-summary" aria-label="Your answers"></div>
 
-      <button id="restartButton" class="text-button restart-button">
-        Take the quiz again ↺
-      </button>
+      <div class="result-actions">
+        <button id="shareButton" class="primary-button" type="button">
+          Share my recap <span>↗</span>
+        </button>
+        <button id="restartButton" class="text-button restart-button" type="button">
+          Take it again ↺
+        </button>
+      </div>
 
       <p id="doneMessage" class="privacy-note">
         <span>♡</span>
-        Your answers have been submitted to the quiz creator and can be reviewed
-        here. The creator can also view submissions through their authenticated dashboard.
+        Your responses have been saved. This recap is yours to keep or share.
       </p>
     </section>
   </main>
 
   <footer class="footer">
-    <span>PROJECT CUPID</span>
+    <span>A LITTLE ABOUT YOU</span>
     <span>made with a little extra care <b>♡</b></span>
   </footer>
 
