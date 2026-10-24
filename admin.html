@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eaf4ff">
+  <title>PROJECT CUPID — Private Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css">
+  <script type="module" src="admin.js"></script>
+</head>
+<body>
+  <div class="sky-glow glow-a" aria-hidden="true"></div><div class="sky-glow glow-b" aria-hidden="true"></div>
+  <header class="topbar"><a class="brand" href="index.html"><span class="brand-icon">♡</span><span class="brand-word">project <b>cupid</b><small>PRIVATE DASHBOARD</small></span></a><a class="text-button" href="index.html">Open quiz ↗</a></header>
+  <main class="admin-shell">
+    <section id="loginPanel" class="admin-panel">
+      <p class="eyebrow"><span></span> JUST FOR THE QUIZ CREATOR</p>
+      <h1>Welcome <em>back.</em></h1>
+      <p class="admin-copy">Sign in with the email and password you created in Firebase Authentication. Only the account UID added to the Firestore rules can read submissions.</p>
+      <form id="loginForm" class="login-form">
+        <label for="email">Email</label><input id="email" type="email" autocomplete="username" required placeholder="you@example.com">
+        <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required placeholder="Your password">
+        <button class="primary-button" type="submit">Sign in <span>→</span></button>
+      </form>
+      <p id="loginMessage" class="admin-message" role="status"></p>
+      <p class="privacy-note"><span>♡</span> Never share this password. Do not put it in your website files.</p>
+    </section>
+    <section id="dashboardPanel" class="admin-panel" hidden>
+      <div class="dashboard-top"><div><p class="eyebrow"><span></span> YOUR PRIVATE SPACE</p><h1>Little <em>details.</em></h1></div><button id="signOutButton" class="secondary-button">Sign out</button></div>
+      <p id="uidLine" class="uid-line"></p>
+      <div class="dashboard-tools"><p id="statusMessage" class="admin-message" role="status">Loading submissions…</p><button id="refreshButton" class="secondary-button">Refresh ↻</button></div>
+      <div id="submissionsList" class="submissions-list"></div>
+    </section>
+  </main>
+  <footer class="footer"><span>PROJECT CUPID</span><span>private by design <b>♡</b></span></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

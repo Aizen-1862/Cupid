@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == "PASTE_YOUR_ADMIN_AUTH_UID_HERE";
+    }
+
+    match /cupidSubmissions/{submissionId} {
+      // Quiz takers may submit one new response. No public reads, updates, or deletes.
+      allow create: if request.resource.data.keys().hasOnly(['quizVersion', 'answers', 'consentGiven', 'createdAt'])
+        && request.resource.data.keys().hasAll(['quizVersion', 'answers', 'consentGiven', 'createdAt'])
+        && request.resource.data.quizVersion == 1
+        && request.resource.data.consentGiven == true
+        && request.resource.data.answers is list
+        && request.resource.data.answers.size() == 20;
+
+      // Only the one UID configured above can view, update, or delete responses.
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

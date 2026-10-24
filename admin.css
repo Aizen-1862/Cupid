@@ -1,0 +1,25 @@
+/* Private dashboard styles — matches the romantic blue quiz. */
+.admin-shell { width: min(100% - 32px, 980px); min-height: calc(100vh - 150px); margin: 0 auto; padding: 28px 0 60px; }
+.admin-panel { background: rgba(255,255,255,.82); border: 1px solid rgba(255,255,255,.95); border-radius: 28px; padding: clamp(22px, 4vw, 42px); box-shadow: var(--shadow); backdrop-filter: blur(14px); }
+.admin-panel[hidden] { display:none !important; }
+.admin-panel h1 { font-size: clamp(38px, 6vw, 56px); }
+.admin-copy { max-width: 620px; color: var(--muted); line-height: 1.8; }
+.login-form { display:grid; gap:10px; max-width:440px; margin-top:28px; }
+.login-form label { color:#536b8b; font-size:13px; font-weight:700; }
+.login-form input { width:100%; border:1px solid var(--line); border-radius:14px; padding:14px 15px; background:#fbfdff; color:var(--ink); outline:none; }
+.login-form input:focus { border-color:#86afe7; box-shadow:0 0 0 3px rgba(100,151,219,.13); }
+.login-form .primary-button { margin-top:8px; }
+.admin-message { color:#617995; font-size:13px; line-height:1.6; overflow-wrap:anywhere; }
+.dashboard-top,.dashboard-tools { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.uid-line { padding:12px 14px; border-radius:12px; background:#f0f6ff; color:#617995; font-size:12px; overflow-wrap:anywhere; }
+.dashboard-tools { margin:20px 0; }
+.submissions-list { display:grid; gap:16px; }
+.submission-card { border:1px solid #dce8f8; border-radius:20px; padding:20px; background:rgba(255,255,255,.8); }
+.submission-card h2 { font-size:24px; margin:0 0 5px; }
+.submission-meta { color:#8495ad; font-size:12px; margin:0 0 16px; }
+.submission-answers { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.answer-tile { padding:13px; border-radius:13px; background:#f3f7ff; min-width:0; }
+.answer-tile small { display:block; color:#7890b0; font-size:10px; text-transform:uppercase; letter-spacing:.09em; margin-bottom:6px; }
+.answer-tile b { display:block; color:#304867; font-size:13px; line-height:1.55; overflow-wrap:anywhere; font-weight:600; }
+.empty-state { text-align:center; color:#7c8ea8; padding:34px 10px; }
+@media(max-width:600px) { .submission-answers { grid-template-columns:1fr; } .submission-card { padding:15px; } }
