@@ -174,7 +174,7 @@ const QUESTIONS = [
   }
 ];
 
-import { db } from "./firebase-config.js";
+import { db } from "./firebase-config.js?v=2";
 import {
   addDoc,
   collection,
