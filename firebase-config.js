@@ -9,8 +9,9 @@ const firebaseConfig = {
   authDomain: "cupid-abcec.firebaseapp.com",
   projectId: "cupid-abcec",
   storageBucket: "cupid-abcec.firebasestorage.app",
-  messagingSenderId: "1:823438889023:web:9a0c4cf67ad6444640e88a",
-  appId: "G-5TV211S2CF"
+  messagingSenderId: "823438889023",
+  appId: "1:823438889023:web:9a0c4cf67ad6444640e88a",
+  measurementId: "G-5TV211S2CF"
 };
 
 const app = initializeApp(firebaseConfig);
