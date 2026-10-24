@@ -378,15 +378,21 @@ async function submitAnswers() {
 
   isSubmitting = true;
   nextButton.disabled = true;
-  nextButton.textContent = "Sending…";
+  nextButton.textContent = "Saving…";
+
+  // Always show the user's recap immediately; saving happens in the background.
+  renderAnswerSummary();
+  showScreen(doneScreen);
+  doneIntro.textContent = "Here's a recap of what you shared. Your answers are being saved for the page's creator.";
+  doneMessage.textContent = "Saving your responses…";
+
+  const payload = QUESTIONS.map((question, questionIndex) => ({
+    category: question.category,
+    question: question.question,
+    answer: currentAnswerText(questionIndex)
+  }));
 
   try {
-    const payload = QUESTIONS.map((question, questionIndex) => ({
-      category: question.category,
-      question: question.question,
-      answer: currentAnswerText(questionIndex)
-    }));
-
     await addDoc(collection(db, "cupidSubmissions"), {
       quizVersion: 1,
       answers: payload,
@@ -394,28 +400,16 @@ async function submitAnswers() {
       createdAt: serverTimestamp()
     });
 
-    // Show the recap only after Firebase confirms the submission.
-    isSubmitting = false;
-    renderAnswerSummary();
-    showScreen(doneScreen);
-
-    doneIntro.textContent =
-      "Your answers have been saved. Here's a little recap of what you shared — you can review it before you go.";
-
-    doneMessage.textContent =
-      "Your responses have been saved. This recap is yours to keep or share.";
-
+    doneIntro.textContent = "Your answers have been saved. Here's your little recap — you can review it before you go.";
+    doneMessage.textContent = "Your responses have been saved. This recap is yours to keep or share.";
   } catch (error) {
     console.error("PROJECT CUPID submission failed:", error);
-
+    doneIntro.textContent = "Here's your recap of what you shared. We couldn't save your answers to the creator's page this time.";
+    doneMessage.textContent = "Your recap is still here, but the submission may not have reached the creator. Check your connection and try again later.";
+    showToast("Your recap is ready, but saving failed. Please check your connection.");
+  } finally {
     isSubmitting = false;
-    nextButton.innerHTML = 'Try sending again <span>↻</span>';
     nextButton.disabled = false;
-
-    const code = error?.code || "unknown";
-    const details = error?.message || "No additional error details were provided.";
-    showToast(`Couldn't send answers (${code}). ${details}`);
-
   }
 }
 
