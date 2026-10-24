@@ -179,7 +179,7 @@ import {
   addDoc,
   collection,
   serverTimestamp
-} from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 const welcomeScreen = document.querySelector("#welcomeScreen");
 const quizScreen = document.querySelector("#quizScreen");
@@ -202,6 +202,7 @@ const customAnswer = document.querySelector("#customAnswer");
 const backButton = document.querySelector("#backButton");
 const nextButton = document.querySelector("#nextButton");
 const restartButton = document.querySelector("#restartButton");
+const shareButton = document.querySelector("#shareButton");
 
 const doneIntro = document.querySelector("#doneIntro");
 const doneMessage = document.querySelector("#doneMessage");
@@ -314,7 +315,7 @@ function renderQuestion() {
         item.setAttribute("aria-pressed", String(selected));
       });
 
-      nextButton.disabled = !hasAnswer() || isSubmitting;
+      nextButton.disabled = isSubmitting;
     });
 
     optionsList.append(button);
@@ -327,7 +328,7 @@ function renderQuestion() {
       ? 'Finish <span>♡</span>'
       : 'Continue <span>→</span>';
 
-  nextButton.disabled = !hasAnswer() || isSubmitting;
+  nextButton.disabled = isSubmitting;
 }
 
 function startQuiz() {
@@ -352,7 +353,7 @@ function moveBack() {
 async function moveNext() {
   answers[index].custom = customAnswer.value.slice(0, 180);
 
-  if (!hasAnswer() || isSubmitting) return;
+  if (isSubmitting) return;
 
   if (index < QUESTIONS.length - 1) {
     index++;
@@ -393,7 +394,8 @@ async function submitAnswers() {
       createdAt: serverTimestamp()
     });
 
-    // Show the answers only after Firebase confirms the submission.
+    // Show the recap only after Firebase confirms the submission.
+    isSubmitting = false;
     renderAnswerSummary();
     showScreen(doneScreen);
 
@@ -401,7 +403,7 @@ async function submitAnswers() {
       "Your answers have been saved. Here's a little recap of what you shared — you can review it before you go.";
 
     doneMessage.textContent =
-      "Your answers have been submitted to the quiz creator. You can review your responses above, and the creator can also view submissions through their authenticated private dashboard.";
+      "Your responses have been saved. This recap is yours to keep or share.";
 
   } catch (error) {
     console.error("PROJECT CUPID submission failed:", error);
@@ -438,6 +440,53 @@ function renderAnswerSummary() {
   });
 }
 
+function buildShareText() {
+  const lines = [
+    "A little about me ♡",
+    "",
+    ...QUESTIONS.map((question, questionIndex) =>
+      `${question.category} — ${question.question}\n${currentAnswerText(questionIndex)}`
+    )
+  ];
+  return lines.join("\n\n");
+}
+
+async function shareResults() {
+  const shareData = {
+    title: "A little about me",
+    text: buildShareText()
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+      return;
+    }
+
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(shareData.text);
+      showToast("Your recap was copied. You can paste and share it anywhere.");
+      return;
+    }
+
+    const field = document.createElement("textarea");
+    field.value = shareData.text;
+    field.setAttribute("readonly", "");
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.append(field);
+    field.select();
+    const copied = document.execCommand("copy");
+    field.remove();
+    if (!copied) throw new Error("Copy is unavailable in this browser.");
+    showToast("Your recap was copied. You can paste and share it anywhere.");
+  } catch (error) {
+    if (error?.name === "AbortError") return;
+    console.error("PROJECT CUPID share failed:", error);
+    showToast("Sharing isn't available here. You can select and copy your recap.");
+  }
+}
+
 function restartQuiz() {
   if (isSubmitting) return;
 
@@ -453,10 +502,11 @@ backButton.addEventListener("click", moveBack);
 
 customAnswer.addEventListener("input", () => {
   answers[index].custom = customAnswer.value.slice(0, 180);
-  nextButton.disabled = !hasAnswer() || isSubmitting;
+  nextButton.disabled = isSubmitting;
 });
 
 restartButton.addEventListener("click", restartQuiz);
+shareButton.addEventListener("click", shareResults);
 
 document.addEventListener("keydown", event => {
   if (
