@@ -473,118 +473,148 @@ async function createRecapImage() {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Image canvas is unavailable.");
 
-  const width = 900;
-  const pad = 64;
-  const contentWidth = width - pad * 2;
+  // Square social-card layout: 10 answers in each column.
+  const size = 1200;
   const scale = 2;
+  const margin = 72;
+  const gap = 40;
+  const cardX = 42;
+  const cardY = 42;
+  const cardSize = size - cardX * 2;
+  const contentX = margin;
+  const contentWidth = (size - margin * 2 - gap) / 2;
+  const col2X = contentX + contentWidth + gap;
   const rows = QUESTIONS.map((question, questionIndex) => ({
     category: question.category,
     question: question.question,
     answer: currentAnswerText(questionIndex)
   }));
 
-  // Measure the full receipt first so every answer fits in one shareable PNG.
-  ctx.font = "600 25px Arial";
-  let estimatedHeight = 330;
-  for (const row of rows) {
-    estimatedHeight += 48;
-    ctx.font = "600 25px Arial";
-    estimatedHeight += Math.max(1, Math.ceil(ctx.measureText(row.question).width / contentWidth)) * 34;
-    ctx.font = "400 24px Arial";
-    estimatedHeight += Math.max(1, Math.ceil(ctx.measureText(row.answer).width / contentWidth)) * 33;
-    estimatedHeight += 34;
-  }
-  estimatedHeight += 100;
-
-  canvas.width = width * scale;
-  canvas.height = estimatedHeight * scale;
+  canvas.width = size * scale;
+  canvas.height = size * scale;
   ctx.scale(scale, scale);
 
-  const roundRect = (x, y, w, h, r) => {
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, h, r);
-  };
+  // Soft lavender paper with a warm, receipt-inspired card.
+  ctx.fillStyle = "#eeeafa";
+  ctx.fillRect(0, 0, size, size);
+  const glow = ctx.createLinearGradient(0, 0, size, size);
+  glow.addColorStop(0, "#f8eafa");
+  glow.addColorStop(0.52, "#eef2ff");
+  glow.addColorStop(1, "#e6f4f5");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, size, size);
 
-  ctx.fillStyle = "#edf4ff";
-  ctx.fillRect(0, 0, width, estimatedHeight);
-
-  ctx.fillStyle = "#dbe8fa";
+  ctx.fillStyle = "rgba(255,255,255,0.46)";
   ctx.beginPath();
-  ctx.arc(width - 55, 45, 125, 0, Math.PI * 2);
+  ctx.arc(1080, 105, 170, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "#f8e5f0";
   ctx.beginPath();
-  ctx.arc(35, estimatedHeight - 20, 115, 0, Math.PI * 2);
+  ctx.arc(80, 1110, 190, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.shadowColor = "rgba(53, 75, 120, 0.12)";
-  ctx.shadowBlur = 28;
-  ctx.shadowOffsetY = 10;
-  roundRect(35, 28, width - 70, estimatedHeight - 56, 28);
-  ctx.fillStyle = "#fffdfb";
+  ctx.shadowColor = "rgba(66, 52, 92, 0.12)";
+  ctx.shadowBlur = 32;
+  ctx.shadowOffsetY = 12;
+  ctx.beginPath();
+  ctx.roundRect(cardX, cardY, cardSize, cardSize, 38);
+  ctx.fillStyle = "#fffdfc";
   ctx.fill();
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
 
-  let y = 94;
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#9a6b9e";
-  ctx.font = "600 22px Arial";
-  ctx.fillText("♡  A LITTLE ABOUT YOU  ♡", width / 2, y);
-  y += 60;
-
-  ctx.fillStyle = "#29314d";
-  ctx.font = "bold 52px Georgia, serif";
-  ctx.fillText("My little world", width / 2, y);
-  y += 42;
-
-  ctx.fillStyle = "#7f8198";
-  ctx.font = "400 24px Arial";
   const name = participantNameInput.value.trim().slice(0, 60);
-  ctx.fillText(name ? `A little recap for ${name}` : "A little recap of me", width / 2, y);
-  y += 48;
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#b17b9f";
+  ctx.font = "600 20px Arial";
+  ctx.fillText("♡  A LITTLE ABOUT YOU  ♡", size / 2, 96);
 
-  ctx.strokeStyle = "#e9dce8";
+  ctx.fillStyle = "#302d49";
+  ctx.font = "bold 48px Georgia, serif";
+  ctx.fillText("My little world", size / 2, 151);
+
+  ctx.fillStyle = "#89839a";
+  ctx.font = "400 20px Arial";
+  const subtitle = name ? `A little recap for ${name}` : "A little recap of me";
+  ctx.fillText(subtitle.length > 48 ? subtitle.slice(0, 45) + "…" : subtitle, size / 2, 185);
+
+  // Decorative heart divider and clear two-column layout.
+  ctx.strokeStyle = "#e8dce9";
   ctx.lineWidth = 2;
-  ctx.setLineDash([7, 8]);
+  ctx.setLineDash([5, 7]);
   ctx.beginPath();
-  ctx.moveTo(pad, y);
-  ctx.lineTo(width - pad, y);
+  ctx.moveTo(margin, 211);
+  ctx.lineTo(size - margin, 211);
   ctx.stroke();
   ctx.setLineDash([]);
-  y += 36;
 
-  ctx.textAlign = "left";
-  for (const row of rows) {
-    ctx.fillStyle = "#ad7a9f";
-    ctx.font = "bold 18px Arial";
-    ctx.fillText(row.category.toUpperCase(), pad, y);
-    y += 32;
+  const listTop = 244;
+  const footerY = 1138;
+  const listBottom = 1098;
+  const columnGapX = contentX + contentWidth + gap / 2;
+  ctx.strokeStyle = "#f0e6ee";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(columnGapX, listTop - 8);
+  ctx.lineTo(columnGapX, listBottom);
+  ctx.stroke();
 
-    ctx.fillStyle = "#30334d";
-    ctx.font = "600 25px Arial";
-    y = wrapCanvasText(ctx, row.question, pad, y, contentWidth, 34);
-    y += 3;
-
-    ctx.fillStyle = "#62647a";
-    ctx.font = "400 24px Arial";
-    y = wrapCanvasText(ctx, row.answer, pad, y, contentWidth, 33);
-    y += 20;
-
-    ctx.strokeStyle = "#eee6ed";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(pad, y - 3);
-    ctx.lineTo(width - pad, y - 3);
-    ctx.stroke();
-    y += 20;
+  function drawWrapped(text, x, y, maxWidth, lineHeight, maxLines) {
+    const words = String(text || "—").split(/\\s+/);
+    let line = "";
+    let lines = [];
+    for (const word of words) {
+      const candidate = line ? line + " " + word : word;
+      if (ctx.measureText(candidate).width > maxWidth && line) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = candidate;
+      }
+    }
+    if (line) lines.push(line);
+    if (lines.length > maxLines) {
+      lines = lines.slice(0, maxLines);
+      let last = lines[maxLines - 1];
+      while (last.length && ctx.measureText(last + "…").width > maxWidth) last = last.slice(0, -1);
+      lines[maxLines - 1] = last.trimEnd() + "…";
+    }
+    lines.forEach((lineText, i) => ctx.fillText(lineText, x, y + i * lineHeight));
+    return y + lines.length * lineHeight;
   }
 
+  rows.forEach((row, index) => {
+    const col = index < 10 ? 0 : 1;
+    const localIndex = index % 10;
+    const x = col === 0 ? contentX : col2X;
+    const rowTop = listTop + localIndex * 84;
+    const textWidth = contentWidth - 12;
+
+    ctx.fillStyle = "#bd8bac";
+    ctx.font = "bold 13px Arial";
+    ctx.textAlign = "left";
+    ctx.fillText(String(localIndex + 1).padStart(2, "0") + "  " + String(row.category).toUpperCase().slice(0, 22), x, rowTop);
+
+    ctx.fillStyle = "#37324c";
+    ctx.font = "600 16px Arial";
+    let y = drawWrapped(row.question, x, rowTop + 22, textWidth, 19, 2);
+
+    ctx.fillStyle = "#777187";
+    ctx.font = "400 15px Arial";
+    y = drawWrapped(row.answer, x, y + 2, textWidth, 18, 2);
+
+    ctx.strokeStyle = "#f0e8ef";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, rowTop + 75);
+    ctx.lineTo(x + contentWidth - 8, rowTop + 75);
+    ctx.stroke();
+  });
+
   ctx.textAlign = "center";
-  ctx.fillStyle = "#a2769a";
-  ctx.font = "600 22px Arial";
-  ctx.fillText("made of little things ♡", width / 2, y + 12);
+  ctx.fillStyle = "#ad7b9d";
+  ctx.font = "600 19px Arial";
+  ctx.fillText("made of little things  ♡", size / 2, footerY);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(blob => {
