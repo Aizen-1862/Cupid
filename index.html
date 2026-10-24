@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
+  <script type="module" src="script.js"></script>
 </head>
 <body>
   <div class="sky-glow glow-a" aria-hidden="true"></div>
@@ -40,8 +40,12 @@
       <div class="welcome-tags">
         <span>♪ music</span><span>✿ little joys</span><span>☾ dreams</span><span>♡ favourites</span>
       </div>
-      <button id="startButton" class="primary-button">Let's begin <span>→</span></button>
-      <p class="privacy-note"><span>♡</span> Your answers stay on this device unless you choose to share them.</p>
+      <label class="consent-box" for="consentCheckbox">
+        <input id="consentCheckbox" type="checkbox">
+        <span>I understand my answers will be submitted to the quiz creator to help plan a personalized birthday surprise. They won't be shown to me at the end, and only the creator's authenticated private dashboard can view them.</span>
+      </label>
+      <button id="startButton" class="primary-button" disabled>Let's begin <span>→</span></button>
+      <p class="privacy-note"><span>♡</span> You can leave before finishing; answers are only submitted when you tap Finish.</p>
     </section>
 
     <section id="quizScreen" class="screen quiz-screen" aria-labelledby="questionTitle" hidden>
@@ -70,14 +74,10 @@
       <div class="done-flower" aria-hidden="true">✿</div>
       <p class="eyebrow"><span></span> THAT'S A LITTLE MORE YOU</p>
       <h1>Lovely answers.<br><em>Lovely you.</em></h1>
-      <p class="hero-intro">You've shared a little tour of your world. You can review your answers and choose whether to share them with someone.</p>
-      <div id="answerSummary" class="answer-summary"></div>
-      <div class="done-actions">
-        <button id="downloadButton" class="primary-button">Save my answers <span>↓</span></button>
-        <button id="shareButton" class="secondary-button">Share answers <span>↗</span></button>
-      </div>
-      <button id="restartButton" class="text-button restart-button">Start again ↺</button>
-      <p id="doneMessage" class="privacy-note"><span>♡</span> Nothing is uploaded to a server. Sharing happens only when you choose it.</p>
+      <p id="doneIntro" class="hero-intro">Your answers have been sent securely. Thanks for sharing a little tour of your world — you can close this page now.</p>
+      <div class="sent-card"><span class="sent-heart">♡</span><b>Little details make lovely surprises.</b><span>Your answers won't appear on this screen.</span></div>
+      <button id="restartButton" class="text-button restart-button">Take the quiz again ↺</button>
+      <p id="doneMessage" class="privacy-note"><span>♡</span> Your answers are stored in the quiz creator's Firebase project and are readable only by the creator's authenticated account.</p>
     </section>
   </main>
 
