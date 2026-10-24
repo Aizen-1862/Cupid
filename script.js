@@ -444,50 +444,190 @@ function renderAnswerSummary() {
   });
 }
 
-function buildShareText() {
-  const lines = [
-    "A little about me ♡",
-    "",
-    ...QUESTIONS.map((question, questionIndex) =>
-      `${question.category} — ${question.question}\n${currentAnswerText(questionIndex)}`
-    )
-  ];
-  return lines.join("\n\n");
+function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = String(text).split(/\\s+/);
+  let line = "";
+  let cursorY = y;
+
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (ctx.measureText(candidate).width > maxWidth && line) {
+      ctx.fillText(line, x, cursorY);
+      line = word;
+      cursorY += lineHeight;
+    } else {
+      line = candidate;
+    }
+  }
+
+  if (line) {
+    ctx.fillText(line, x, cursorY);
+    cursorY += lineHeight;
+  }
+
+  return cursorY;
+}
+
+async function createRecapImage() {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Image canvas is unavailable.");
+
+  const width = 900;
+  const pad = 64;
+  const contentWidth = width - pad * 2;
+  const scale = 2;
+  const rows = QUESTIONS.map((question, questionIndex) => ({
+    category: question.category,
+    question: question.question,
+    answer: currentAnswerText(questionIndex)
+  }));
+
+  // Measure the full receipt first so every answer fits in one shareable PNG.
+  ctx.font = "600 25px Arial";
+  let estimatedHeight = 330;
+  for (const row of rows) {
+    estimatedHeight += 48;
+    ctx.font = "600 25px Arial";
+    estimatedHeight += Math.max(1, Math.ceil(ctx.measureText(row.question).width / contentWidth)) * 34;
+    ctx.font = "400 24px Arial";
+    estimatedHeight += Math.max(1, Math.ceil(ctx.measureText(row.answer).width / contentWidth)) * 33;
+    estimatedHeight += 34;
+  }
+  estimatedHeight += 100;
+
+  canvas.width = width * scale;
+  canvas.height = estimatedHeight * scale;
+  ctx.scale(scale, scale);
+
+  const roundRect = (x, y, w, h, r) => {
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+  };
+
+  ctx.fillStyle = "#edf4ff";
+  ctx.fillRect(0, 0, width, estimatedHeight);
+
+  ctx.fillStyle = "#dbe8fa";
+  ctx.beginPath();
+  ctx.arc(width - 55, 45, 125, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#f8e5f0";
+  ctx.beginPath();
+  ctx.arc(35, estimatedHeight - 20, 115, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.shadowColor = "rgba(53, 75, 120, 0.12)";
+  ctx.shadowBlur = 28;
+  ctx.shadowOffsetY = 10;
+  roundRect(35, 28, width - 70, estimatedHeight - 56, 28);
+  ctx.fillStyle = "#fffdfb";
+  ctx.fill();
+  ctx.shadowColor = "transparent";
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+
+  let y = 94;
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#9a6b9e";
+  ctx.font = "600 22px Arial";
+  ctx.fillText("♡  A LITTLE ABOUT YOU  ♡", width / 2, y);
+  y += 60;
+
+  ctx.fillStyle = "#29314d";
+  ctx.font = "bold 52px Georgia, serif";
+  ctx.fillText("My little world", width / 2, y);
+  y += 42;
+
+  ctx.fillStyle = "#7f8198";
+  ctx.font = "400 24px Arial";
+  const name = participantNameInput.value.trim().slice(0, 60);
+  ctx.fillText(name ? `A little recap for ${name}` : "A little recap of me", width / 2, y);
+  y += 48;
+
+  ctx.strokeStyle = "#e9dce8";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([7, 8]);
+  ctx.beginPath();
+  ctx.moveTo(pad, y);
+  ctx.lineTo(width - pad, y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  y += 36;
+
+  ctx.textAlign = "left";
+  for (const row of rows) {
+    ctx.fillStyle = "#ad7a9f";
+    ctx.font = "bold 18px Arial";
+    ctx.fillText(row.category.toUpperCase(), pad, y);
+    y += 32;
+
+    ctx.fillStyle = "#30334d";
+    ctx.font = "600 25px Arial";
+    y = wrapCanvasText(ctx, row.question, pad, y, contentWidth, 34);
+    y += 3;
+
+    ctx.fillStyle = "#62647a";
+    ctx.font = "400 24px Arial";
+    y = wrapCanvasText(ctx, row.answer, pad, y, contentWidth, 33);
+    y += 20;
+
+    ctx.strokeStyle = "#eee6ed";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad, y - 3);
+    ctx.lineTo(width - pad, y - 3);
+    ctx.stroke();
+    y += 20;
+  }
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#a2769a";
+  ctx.font = "600 22px Arial";
+  ctx.fillText("made of little things ♡", width / 2, y + 12);
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(blob => {
+      if (blob) resolve(blob);
+      else reject(new Error("Could not create recap image."));
+    }, "image/png");
+  });
 }
 
 async function shareResults() {
-  const shareData = {
-    title: "A little about me",
-    text: buildShareText()
-  };
+  shareButton.disabled = true;
+  const originalButtonText = shareButton.innerHTML;
+  shareButton.textContent = "Preparing image…";
 
   try {
-    if (navigator.share) {
+    const blob = await createRecapImage();
+    const file = new File([blob], "my-little-recap.png", { type: "image/png" });
+    const shareData = { title: "My little world — recap", files: [file] };
+
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
       await navigator.share(shareData);
       return;
     }
 
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(shareData.text);
-      showToast("Your recap was copied. You can paste and share it anywhere.");
-      return;
-    }
-
-    const field = document.createElement("textarea");
-    field.value = shareData.text;
-    field.setAttribute("readonly", "");
-    field.style.position = "fixed";
-    field.style.opacity = "0";
-    document.body.append(field);
-    field.select();
-    const copied = document.execCommand("copy");
-    field.remove();
-    if (!copied) throw new Error("Copy is unavailable in this browser.");
-    showToast("Your recap was copied. You can paste and share it anywhere.");
+    // If the browser cannot share image files directly, save the same PNG
+    // so it can be attached to any app from the phone's gallery/downloads.
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "my-little-recap.png";
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    showToast("Your recap image is ready! Open Downloads and share the PNG.");
   } catch (error) {
-    if (error?.name === "AbortError") return;
-    console.error("PROJECT CUPID share failed:", error);
-    showToast("Sharing isn't available here. You can select and copy your recap.");
+    if (error?.name !== "AbortError") {
+      console.error("PROJECT CUPID image share failed:", error);
+      showToast("Couldn't prepare the recap image. Please try again.");
+    }
+  } finally {
+    shareButton.disabled = false;
+    shareButton.innerHTML = originalButtonText;
   }
 }
 
