@@ -6,7 +6,7 @@ service cloud.firestore {
     }
 
     match /cupidSubmissions/{submissionId} {
-      // Quiz takers may submit one new response. No public reads, updates, or deletes.
+      // Public visitors may create submissions only. No public reads, updates, or deletes.
       allow create: if request.resource.data.keys().hasOnly(['quizVersion', 'answers', 'consentGiven', 'createdAt'])
         && request.resource.data.keys().hasAll(['quizVersion', 'answers', 'consentGiven', 'createdAt'])
         && request.resource.data.quizVersion == 1
