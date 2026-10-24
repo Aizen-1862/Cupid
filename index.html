@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eaf4ff">
+  <meta name="description" content="A gentle, romantic interest-discovery quiz about music, movies, hobbies, style, and favourite things.">
+  <title>PROJECT CUPID — A Little About You</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="sky-glow glow-a" aria-hidden="true"></div>
+  <div class="sky-glow glow-b" aria-hidden="true"></div>
+  <div class="floating-heart heart-a" aria-hidden="true">♡</div>
+  <div class="floating-heart heart-b" aria-hidden="true">✧</div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Project Cupid home">
+      <span class="brand-icon">♡</span>
+      <span class="brand-word">project <b>cupid</b><small>A LITTLE ABOUT YOU</small></span>
+    </a>
+    <div class="top-note"><span class="tiny-heart">♥</span> made for the little things</div>
+  </header>
+
+  <main class="shell">
+    <section id="welcomeScreen" class="screen welcome active" aria-labelledby="heroTitle">
+      <div class="hero-art" aria-hidden="true">
+        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+        <div class="moon">☾</div><div class="hero-heart">♡</div>
+        <span class="spark spark-one">✦</span><span class="spark spark-two">✧</span>
+        <span class="art-caption">your world, your way</span>
+      </div>
+      <div class="eyebrow"><span></span> A SMALL JOURNEY INTO YOUR WORLD</div>
+      <h1 id="heroTitle">Tell me about<br><em>your kind of</em> lovely.</h1>
+      <p class="hero-intro">Your favourite songs, comfort movies, little joys, big dreams — all the things that make you <i>you</i>. No right answers. Just your vibe.</p>
+      <div class="welcome-tags">
+        <span>♪ music</span><span>✿ little joys</span><span>☾ dreams</span><span>♡ favourites</span>
+      </div>
+      <button id="startButton" class="primary-button">Let's begin <span>→</span></button>
+      <p class="privacy-note"><span>♡</span> Your answers stay on this device unless you choose to share them.</p>
+    </section>
+
+    <section id="quizScreen" class="screen quiz-screen" aria-labelledby="questionTitle" hidden>
+      <div class="quiz-heading">
+        <div><p class="eyebrow"><span></span> YOUR LITTLE UNIVERSE</p><p id="categoryLabel" class="category-label">MUSIC & SOUND</p></div>
+        <div class="question-count"><span id="currentNumber">01</span><span class="count-divider">/</span><span id="totalNumber">20</span></div>
+      </div>
+      <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+      <div id="questionCard" class="question-card">
+        <div class="question-deco" aria-hidden="true">♡</div>
+        <p id="questionKicker" class="question-kicker">LET'S START WITH THE GOOD STUFF</p>
+        <h2 id="questionTitle">What's the song you could listen to a hundred times and never get tired of?</h2>
+        <p id="questionSubtitle" class="question-subtitle">Choose one, or tell us your own answer.</p>
+        <div id="optionsList" class="options-list"></div>
+        <label class="custom-answer-label" for="customAnswer">Or tell me your own answer <span>(optional)</span></label>
+        <input id="customAnswer" class="custom-answer" type="text" maxlength="180" placeholder="Type whatever comes to mind…">
+      </div>
+      <div class="quiz-controls">
+        <button id="backButton" class="text-button">← Back</button>
+        <span class="autosave-note">♡ saved as you go</span>
+        <button id="nextButton" class="primary-button" disabled>Continue <span>→</span></button>
+      </div>
+    </section>
+
+    <section id="doneScreen" class="screen done-screen" hidden>
+      <div class="done-flower" aria-hidden="true">✿</div>
+      <p class="eyebrow"><span></span> THAT'S A LITTLE MORE YOU</p>
+      <h1>Lovely answers.<br><em>Lovely you.</em></h1>
+      <p class="hero-intro">You've shared a little tour of your world. You can review your answers and choose whether to share them with someone.</p>
+      <div id="answerSummary" class="answer-summary"></div>
+      <div class="done-actions">
+        <button id="downloadButton" class="primary-button">Save my answers <span>↓</span></button>
+        <button id="shareButton" class="secondary-button">Share answers <span>↗</span></button>
+      </div>
+      <button id="restartButton" class="text-button restart-button">Start again ↺</button>
+      <p id="doneMessage" class="privacy-note"><span>♡</span> Nothing is uploaded to a server. Sharing happens only when you choose it.</p>
+    </section>
+  </main>
+
+  <footer class="footer"><span>PROJECT CUPID</span><span>made with a little extra care <b>♡</b></span></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
