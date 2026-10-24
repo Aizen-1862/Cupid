@@ -186,6 +186,7 @@ const quizScreen = document.querySelector("#quizScreen");
 const doneScreen = document.querySelector("#doneScreen");
 
 const consentCheckbox = document.querySelector("#consentCheckbox");
+const participantNameInput = document.querySelector("#participantName");
 const startButton = document.querySelector("#startButton");
 
 const categoryLabel = document.querySelector("#categoryLabel");
@@ -333,6 +334,13 @@ function renderQuestion() {
 
 function startQuiz() {
   if (!consentCheckbox.checked) return;
+  if (!participantNameInput.value.trim()) {
+    participantNameInput.setCustomValidity("Please enter your name before starting.");
+    participantNameInput.reportValidity();
+    participantNameInput.focus();
+    return;
+  }
+  participantNameInput.setCustomValidity("");
 
   index = 0;
   answers = QUESTIONS.map(() => ({ choice: "", custom: "" }));
@@ -394,6 +402,7 @@ async function submitAnswers() {
 
   try {
     await addDoc(collection(db, "cupidSubmissions"), {
+      participantName: participantNameInput.value.trim().slice(0, 60),
       quizVersion: 1,
       answers: payload,
       consentGiven: true,
