@@ -59,7 +59,8 @@ async function loadSubmissions() {
       const data = docSnap.data();
       const card = document.createElement("article");
       card.className = "submission-card";
-      card.append(safeText("h2", "", `Response ${snapshot.size - i}`));
+      const participantName = String(data.participantName || "").trim();
+      card.append(safeText("h2", "", participantName || `Response ${snapshot.size - i}`));
       let dateLabel = "Date unavailable";
       if (data.createdAt?.toDate) dateLabel = data.createdAt.toDate().toLocaleString();
       card.append(safeText("p", "submission-meta", `${dateLabel} · consent recorded`));
